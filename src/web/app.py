@@ -24,7 +24,7 @@ logging.getLogger('data').setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 定义异步回调函数
-def chat_response(message: str, history: list) -> tuple[list, str]:
+async def chat_response(message: str, history: list) -> tuple[list, str]:
     """处理聊天消息"""
     logger.info("=== chat_response 函数被调用 ===")
     logger.info(f"输入消息: {message}")
@@ -36,7 +36,7 @@ def chat_response(message: str, history: list) -> tuple[list, str]:
             logger.warning("收到空消息")
             return history, ""
             
-        response = rag_chain.answer_question(message)
+        response = await rag_chain.answer_question(message)
         logger.info(f"RAG Chain 返回响应: {response}")
         
         # 更新对话历史
@@ -55,7 +55,7 @@ def create_demo() -> gr.Blocks:
     
     with gr.Blocks(title="甜品日记AI客服", theme="soft") as demo:
         gr.Markdown("""
-        # 🍰 甜品日记AI客服
+        # 甜品日记AI客服
         
         欢迎使用甜品日记AI客服系统！我可以帮您：
         - 了解蛋糕产品信息
@@ -97,12 +97,11 @@ def create_demo() -> gr.Blocks:
             label="示例问题"
         )
 
-        # 绑定提交事件
+        # 绑定提交事件，使用异步函数
         submit.click(
             fn=chat_response,
-            inputs=[msg, chatbot],  # 传入消息和历史
-            outputs=[chatbot, msg],  # 输出更新后的历史和清空的输入框
-            api_name="chat"
+            inputs=[msg, chatbot],
+            outputs=[chatbot, msg]
         )
         
         msg.submit(
